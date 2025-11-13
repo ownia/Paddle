@@ -2062,6 +2062,14 @@
   attrs :
     axis : dim
 
+- op : index_put
+  inputs :
+    {x : X, indices : Indices, value: Value}
+  outputs :
+    out : Out
+  attrs :
+    accumulate : accumulate
+
 - op : instance_norm
   inputs :
     x : X
