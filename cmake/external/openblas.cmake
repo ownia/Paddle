@@ -17,26 +17,7 @@ include(ExternalProject)
 set(CBLAS_PREFIX_DIR ${THIRD_PARTY_PATH}/openblas)
 set(CBLAS_INSTALL_DIR ${THIRD_PARTY_PATH}/install/openblas)
 set(CBLAS_SOURCE_DIR ${PADDLE_SOURCE_DIR}/third_party/openblas)
-set(CBLAS_TAG v0.3.7)
-
-if(UNIX
-   AND NOT APPLE
-   AND NOT WITH_ROCM
-   AND NOT WITH_XPU)
-  set(CBLAS_TAG v0.3.28)
-endif()
-
-if(APPLE AND WITH_ARM)
-  set(CBLAS_TAG v0.3.13)
-endif()
-
-if(WITH_MIPS)
-  set(CBLAS_TAG v0.3.13)
-endif()
-
-if(WITH_LOONGARCH)
-  set(CBLAS_TAG v0.3.18)
-endif()
+set(CBLAS_TAG v0.3.31)
 
 # For CMake >= 4.0.0, set policy compatibility for OpenBLAS's CMake.
 # Only for Windows builds that use CMAKE_ARGS
@@ -46,26 +27,6 @@ if(WIN32 AND CMAKE_VERSION VERSION_GREATER_EQUAL "4.0.0")
       "OpenBLAS: forcing CMake policy compatibility for CMake >= 4.0 (CMAKE_POLICY_VERSION_MINIMUM=3.5)"
   )
   set(OPENBLAS_POLICY_ARGS -DCMAKE_POLICY_VERSION_MINIMUM=3.5)
-endif()
-
-file(GLOB CBLAS_SOURCE_FILE_LIST ${CBLAS_SOURCE_DIR})
-list(LENGTH CBLAS_SOURCE_FILE_LIST RES_LEN)
-if(RES_LEN EQUAL 0)
-  execute_process(COMMAND ${GIT_EXECUTABLE} clone -b ${CBLAS_TAG}
-                          "${GIT_URL}/xianyi/OpenBLAS.git" ${CBLAS_SOURCE_DIR})
-else()
-  # check git tag
-  execute_process(
-    COMMAND ${GIT_EXECUTABLE} describe --abbrev=6 --always --tags
-    OUTPUT_VARIABLE VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET
-    WORKING_DIRECTORY ${CBLAS_SOURCE_DIR})
-  if(NOT ${VERSION} STREQUAL ${CBLAS_TAG})
-    message(
-      WARNING "openblas version is not ${VERSION}, checkout to ${CBLAS_TAG}")
-    execute_process(COMMAND ${GIT_EXECUTABLE} checkout ${CBLAS_TAG}
-                    WORKING_DIRECTORY ${CBLAS_SOURCE_DIR})
-  endif()
 endif()
 
 if(NOT WIN32)
@@ -87,7 +48,7 @@ if(NOT WIN32)
   endif()
 
   if(WITH_ARM)
-    set(ARM_ARGS TARGET=ARMV8)
+    set(ARM_ARGS TARGET=ARMV8SVE)
   endif()
   set(COMMON_ARGS CC=${OPENBLAS_CC} NO_SHARED=1 NO_LAPACK=1 libs)
   ExternalProject_Add(
